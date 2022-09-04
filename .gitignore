@@ -1,3 +1,4 @@
 /venv/
 /.idea/
 /cardgame/db.sqlite3
+.env
