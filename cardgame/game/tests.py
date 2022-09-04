@@ -1,42 +1,98 @@
-from django.contrib.auth import get_user_model
-from django.test import TestCase
+from channels.testing import ChannelsLiveServerTestCase
+from selenium import webdriver
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.common.keys import Keys
 
 
-class UsersManagersTests(TestCase):
+class ChatTests(ChannelsLiveServerTestCase):
+    serve_static = True  # emulate StaticLiveServerTestCase
 
-    def test_create_user(self):
-        User = get_user_model()
-        user = User.objects.create_user(email='normal@user.com', password='abcd')
-        self.assertEqual(user.email, 'normal@user.com')
-        self.assertTrue(user.is_active)
-        self.assertFalse(user.is_staff)
-        self.assertFalse(user.is_superuser)
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
         try:
-            # username is None for the AbstractUser option
-            # username does not exist for the AbstractBaseUser option
-            self.assertIsNone(user.username)
-        except AttributeError:
-            pass
-        with self.assertRaises(TypeError):
-            User.objects.create_user()
-        with self.assertRaises(TypeError):
-            User.objects.create_user(email='')
-        with self.assertRaises(ValueError):
-            User.objects.create_user(email='', password="abd")
+            # NOTE: Requires "chromedriver" binary to be installed in $PATH
+            cls.driver = webdriver.Firefox()
+        except:
+            super().tearDownClass()
+            raise
 
-    def test_create_superuser(self):
-        User = get_user_model()
-        admin_user = User.objects.create_superuser(email='super@user.com', password='foo')
-        self.assertEqual(admin_user.email, 'super@user.com')
-        self.assertTrue(admin_user.is_active)
-        self.assertTrue(admin_user.is_staff)
-        self.assertTrue(admin_user.is_superuser)
+    @classmethod
+    def tearDownClass(cls):
+        cls.driver.quit()
+        super().tearDownClass()
+
+    def test_when_chat_message_posted_then_seen_by_everyone_in_same_room(self):
         try:
-            # username is None for the AbstractUser option
-            # username does not exist for the AbstractBaseUser option
-            self.assertIsNone(admin_user.username)
-        except AttributeError:
-            pass
-        with self.assertRaises(ValueError):
-            User.objects.create_superuser(
-                email='super@user.com', password='foo', is_superuser=False)
+            self._enter_chat_room('room_1')
+
+            self._open_new_window()
+            self._enter_chat_room('room_1')
+
+            self._switch_to_window(0)
+            self._post_message('hello')
+            WebDriverWait(self.driver, 2).until(lambda _:
+                                                'hello' in self._chat_log_value,
+                                                'Message was not received by window 1 from window 1')
+            self._switch_to_window(1)
+            WebDriverWait(self.driver, 2).until(lambda _:
+                                                'hello' in self._chat_log_value,
+                                                'Message was not received by window 2 from window 1')
+        finally:
+            self._close_all_new_windows()
+
+    def test_when_chat_message_posted_then_not_seen_by_anyone_in_different_room(self):
+        try:
+            self._enter_chat_room('room_1')
+
+            self._open_new_window()
+            self._enter_chat_room('room_2')
+
+            self._switch_to_window(0)
+            self._post_message('hello')
+            WebDriverWait(self.driver, 2).until(lambda _:
+                                                'hello' in self._chat_log_value,
+                                                'Message was not received by window 1 from window 1')
+
+            self._switch_to_window(1)
+            self._post_message('world')
+            WebDriverWait(self.driver, 2).until(lambda _:
+                                                'world' in self._chat_log_value,
+                                                'Message was not received by window 2 from window 2')
+            self.assertTrue('hello' not in self._chat_log_value,
+                            'Message was improperly received by window 2 from window 1')
+        finally:
+            self._close_all_new_windows()
+
+    # === Utility ===
+
+    def _enter_chat_room(self, room_name):
+        self.driver.get(self.live_server_url + '/game/')
+        ActionChains(self.driver).send_keys(room_name + '\n').perform()
+        ActionChains(self.driver).send_keys(Keys.ENTER).perform()
+        WebDriverWait(self.driver, 10).until(lambda _:
+                                            room_name in self.driver.current_url)
+
+    def _open_new_window(self):
+        self.driver.execute_script('window.open("about:blank", "_blank");')
+        self._switch_to_window(-1)
+
+    def _close_all_new_windows(self):
+        while len(self.driver.window_handles) > 1:
+            self._switch_to_window(-1)
+            self.driver.execute_script('window.close();')
+        if len(self.driver.window_handles) == 1:
+            self._switch_to_window(0)
+
+    def _switch_to_window(self, window_index):
+        self.driver.switch_to.window(self.driver.window_handles[window_index])
+
+    def _post_message(self, message):
+        ActionChains(self.driver).send_keys(message + '\n').perform()
+        ActionChains(self.driver).send_keys(Keys.ENTER).perform()
+
+    @property
+    def _chat_log_value(self):
+        return self.driver.find_element(by=By.CSS_SELECTOR, value="#chat-log").get_property('value')
