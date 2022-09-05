@@ -20,8 +20,14 @@
 
         document.querySelector('#room-name-submit').onclick = function(e) {
             var roomName = document.querySelector('#room-name-input').value;
+            var deckId = document.getElementById('cars').value;
             window.location.pathname = '/game/room/' + roomName + '/';
         };
     </script>
+    <select for="decks" id="cars">
+        {% for deck in user.decks.all %}
+            <option value="{{ deck.id }}"> {{ deck.name }} </option>
+        {% endfor %}
+    </select>
 </body>
 </html>

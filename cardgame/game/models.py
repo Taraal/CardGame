@@ -28,3 +28,9 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+
+
+class Deck(BaseModel):
+    name = models.CharField(max_length=50, null=True, blank=True)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="decks")
+    cards = models.ManyToManyField(Card)

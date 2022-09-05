@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.template import RequestContext
 from .forms import MainUserCreationForm
-from .models import CustomUser
+from .models import CustomUser, Deck
 
 # Create your views here.
 
