@@ -7,10 +7,10 @@ from .models import CustomUser
 class MainUserCreationForm(UserCreationForm):
     class Meta:
         model = CustomUser
-        fields = ("username", "email")
+        fields = ("username",)
 
 
 class MainUserChangeForm(UserChangeForm):
     class Meta:
         model = CustomUser
-        fields = ("username", "email")
+        fields = ("username",)
