@@ -27,22 +27,32 @@ tab in your browser, you can chat with yourself asynchronously.
 
 `python manage.py test`
 
-## Contents
-
-- Async chat rooms
 
 ## Roadmap
 
 - User system : 
-  - Register and login users
-  - Enter rooms as a user
+  - [x] Register and login users
+  - [x] Enter rooms as a user
+  - [ ] Add friends
 
 
-- Chat system : 
-  - See which user sent a message
-  - Chat history when joining another room (time limited ?)
-  - Timestamps in messages
+- Room system : 
+  - [x] See which user sent a message
+  - [x] Timestamps in messages
+  - [ ] Chat history when joining another room (time limited ?)
+  - [ ] Room passwords
+  - [ ] Matchmaking system
 
 
 - Card system : 
-  - TBD
+  - [x] Cards with health / attack / description / name
+  - [x] Deck system with multiple cards
+  - [ ] Card modifiers
+
+
+- Game : 
+  - [ ] Turn based system
+  - [ ] Players have and lose HP depending on cards
+
+
+... and much more
