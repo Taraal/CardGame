@@ -2,7 +2,12 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .forms import MainUserChangeForm, MainUserCreationForm, CardCreationForm, DeckCreationForm
+from .forms import (
+    MainUserChangeForm,
+    MainUserCreationForm,
+    CardCreationForm,
+    DeckCreationForm,
+)
 from .models import CustomUser, Card, Deck
 
 
@@ -10,7 +15,10 @@ class CustomUserAdmin(UserAdmin):
     add_form = MainUserCreationForm
     form = MainUserChangeForm
     model = CustomUser
-    list_display = ["email", "username", ]
+    list_display = [
+        "email",
+        "username",
+    ]
 
 
 class CardAdmin(admin.ModelAdmin):

@@ -17,10 +17,7 @@ def room(request, room_name):
         print(request.POST)
         deck = Deck.objects.get(pk=request.POST['deck_id'])
 
-        context = {
-            'room_name': room_name,
-            'deck': deck
-        }
+        context = {'room_name': room_name, 'deck': deck}
 
         return render(request, 'game/room.html', context)
     else:
@@ -38,7 +35,5 @@ def registration(request):
     else:
         form = MainUserCreationForm()
 
-    context = {
-        'form': form
-    }
+    context = {'form': form}
     return render(request, 'game/register.html', context)

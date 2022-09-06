@@ -33,17 +33,21 @@ class ChatTests(ChannelsLiveServerTestCase):
 
             self._switch_to_window(0)
             self._post_message('hello')
-            WebDriverWait(self.driver, 2).until(lambda _:
-                                                'hello' in self._chat_log_value,
-                                                'Message was not received by window 1 from window 1')
+            WebDriverWait(self.driver, 2).until(
+                lambda _: 'hello' in self._chat_log_value,
+                'Message was not received by window 1 from window 1',
+            )
             self._switch_to_window(1)
-            WebDriverWait(self.driver, 2).until(lambda _:
-                                                'hello' in self._chat_log_value,
-                                                'Message was not received by window 2 from window 1')
+            WebDriverWait(self.driver, 2).until(
+                lambda _: 'hello' in self._chat_log_value,
+                'Message was not received by window 2 from window 1',
+            )
         finally:
             self._close_all_new_windows()
 
-    def test_when_chat_message_posted_then_not_seen_by_anyone_in_different_room(self):
+    def test_when_chat_message_posted_then_not_seen_by_anyone_in_different_room(
+        self,
+    ):
         try:
             self._enter_chat_room('room_1')
 
@@ -52,17 +56,21 @@ class ChatTests(ChannelsLiveServerTestCase):
 
             self._switch_to_window(0)
             self._post_message('hello')
-            WebDriverWait(self.driver, 2).until(lambda _:
-                                                'hello' in self._chat_log_value,
-                                                'Message was not received by window 1 from window 1')
+            WebDriverWait(self.driver, 2).until(
+                lambda _: 'hello' in self._chat_log_value,
+                'Message was not received by window 1 from window 1',
+            )
 
             self._switch_to_window(1)
             self._post_message('world')
-            WebDriverWait(self.driver, 2).until(lambda _:
-                                                'world' in self._chat_log_value,
-                                                'Message was not received by window 2 from window 2')
-            self.assertTrue('hello' not in self._chat_log_value,
-                            'Message was improperly received by window 2 from window 1')
+            WebDriverWait(self.driver, 2).until(
+                lambda _: 'world' in self._chat_log_value,
+                'Message was not received by window 2 from window 2',
+            )
+            self.assertTrue(
+                'hello' not in self._chat_log_value,
+                'Message was improperly received by window 2 from window 1',
+            )
         finally:
             self._close_all_new_windows()
 
@@ -72,8 +80,9 @@ class ChatTests(ChannelsLiveServerTestCase):
         self.driver.get(self.live_server_url + '/game/')
         ActionChains(self.driver).send_keys(room_name + '\n').perform()
         ActionChains(self.driver).send_keys(Keys.ENTER).perform()
-        WebDriverWait(self.driver, 10).until(lambda _:
-                                            room_name in self.driver.current_url)
+        WebDriverWait(self.driver, 10).until(
+            lambda _: room_name in self.driver.current_url
+        )
 
     def _open_new_window(self):
         self.driver.execute_script('window.open("about:blank", "_blank");')
@@ -95,4 +104,6 @@ class ChatTests(ChannelsLiveServerTestCase):
 
     @property
     def _chat_log_value(self):
-        return self.driver.find_element(by=By.CSS_SELECTOR, value="#chat-log").get_property('value')
+        return self.driver.find_element(
+            by=By.CSS_SELECTOR, value="#chat-log"
+        ).get_property('value')

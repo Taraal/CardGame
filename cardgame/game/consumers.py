@@ -14,7 +14,7 @@ def handle_message(text_data_json):
         'type': 'chat_message',
         'message': message,
         "username": username,
-        "time": time.strftime("%m/%d/%Y, %H:%M:%S")
+        "time": time.strftime("%m/%d/%Y, %H:%M:%S"),
     }
 
 
@@ -47,8 +47,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         # Join room group
         await self.channel_layer.group_add(
-            self.room_group_name,
-            self.channel_name
+            self.room_group_name, self.channel_name
         )
 
         await self.accept()
@@ -56,8 +55,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         # Leave room group
         await self.channel_layer.group_discard(
-            self.room_group_name,
-            self.channel_name
+            self.room_group_name, self.channel_name
         )
 
     # Receive message from WebSocket
@@ -71,10 +69,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             data = handle_card(text_data_json)
 
         # Send message to room group
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            data
-        )
+        await self.channel_layer.group_send(self.room_group_name, data)
 
     # Receive message from room group
     async def chat_message(self, event):
@@ -83,12 +78,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
         time = event['time']
 
         # Send message to WebSocket
-        await self.send(text_data=json.dumps({
-            'type': 'message',
-            'message': message,
-            "username": username,
-            "time": time
-        }, default=str))
+        await self.send(
+            text_data=json.dumps(
+                {
+                    'type': 'message',
+                    'message': message,
+                    "username": username,
+                    "time": time,
+                },
+                default=str,
+            )
+        )
 
     async def card(self, event):
         card_id = event['card_id']
@@ -97,11 +97,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
         card_name = event['card_name']
         username = event['username']
 
-        await self.send(text_data=json.dumps({
-            'type': 'card',
-            'card_id': card_id,
-            'card_hp': card_hp,
-            'card_atk': card_attack,
-            'card_name': card_name,
-            'username': username,
-        }, default=str))
+        await self.send(
+            text_data=json.dumps(
+                {
+                    'type': 'card',
+                    'card_id': card_id,
+                    'card_hp': card_hp,
+                    'card_atk': card_attack,
+                    'card_name': card_name,
+                    'username': username,
+                },
+                default=str,
+            )
+        )
