@@ -7,8 +7,18 @@
 </head>
 <body>
     What chat room would you like to enter?<br>
-    <input id="room-name-input" type="text" size="100"><br>
-    <input id="room-name-submit" type="button" value="Enter">
+    <form id='roomForm' method="POST" onsubmit="changeFormAction()">
+        {% csrf_token %}
+        <input id="room-name-input" type="text" size="100"><br>
+        <input id="room-name-submit" type="submit" value="Enter">
+
+    </form>
+        <label for="decks">Choose a deck:</label>
+        <select name='deck_id' id="decks" form="roomForm">
+            {% for deck in user.decks.all %}
+                <option value="{{ deck.id }}"> {{ deck.name }} </option>
+            {% endfor %}
+        </select>
 
     <script>
         document.querySelector('#room-name-input').focus();
@@ -18,16 +28,13 @@
             }
         };
 
-        document.querySelector('#room-name-submit').onclick = function(e) {
+        function changeFormAction() {
+            var form = document.forms['roomForm'];
             var roomName = document.querySelector('#room-name-input').value;
-            var deckId = document.getElementById('cars').value;
-            window.location.pathname = '/game/room/' + roomName + '/';
-        };
+            form.action = "room/" + roomName + "/";
+            form.submit();
+        }
     </script>
-    <select for="decks" id="cars">
-        {% for deck in user.decks.all %}
-            <option value="{{ deck.id }}"> {{ deck.name }} </option>
-        {% endfor %}
-    </select>
+
 </body>
 </html>

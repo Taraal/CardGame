@@ -12,10 +12,19 @@ def index(request):
 
 
 def room(request, room_name):
+    if request.method == 'POST':
 
-    return render(request, 'game/room.html', {
-        'room_name': room_name
-    })
+        print(request.POST)
+        deck = Deck.objects.get(pk=request.POST['deck_id'])
+
+        context = {
+            'room_name': room_name,
+            'deck': deck
+        }
+
+        return render(request, 'game/room.html', context)
+    else:
+        return redirect('index')
 
 
 def registration(request):

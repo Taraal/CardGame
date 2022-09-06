@@ -2,6 +2,7 @@ import json
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.core import serializers
+import datetime
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -35,7 +36,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
         username = text_data_json['username']
+        time = datetime.datetime.now()
 
+        print(time.strftime("%m/%d/%Y, %H:%M:%S"))
         # Send message to room group
         await self.channel_layer.group_send(
             self.room_group_name,
@@ -43,6 +46,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'type': 'chat_message',
                 'message': message,
                 "username": username,
+                "time": time.strftime("%m/%d/%Y, %H:%M:%S")
             }
         )
 
@@ -50,9 +54,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def chat_message(self, event):
         message = event['message']
         username = event['username']
+        time = event['time']
 
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
             'message': message,
             "username": username,
-        }))
+            "time": time
+        }, default=str))
