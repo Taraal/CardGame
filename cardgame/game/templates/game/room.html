@@ -24,8 +24,17 @@
         );
 
         chatSocket.onmessage = function(e) {
+            console.log("wut");
             const data = JSON.parse(e.data);
-            document.querySelector('#chat-log').value += ('(' + data.time + ') ' + data.username + " : " + data.message + '\n');
+            console.log(data);
+            console.log(data.type);
+            if(data.type == "message"){
+                document.querySelector('#chat-log').value += ('(' + data.time + ') ' + data.username + " : " + data.message + '\n');
+            }
+            if(data.type == "card"){
+                document.querySelector('#chat-log').value += (data.username + 'plays ' + data.card_name + ' : HP ' + data.card_hp + ' | ATK ' + data.card_atk + '\n');
+                document.getElementById('card_div_' + data.card_id).hidden = true;
+            }
         };
 
         chatSocket.onclose = function(e) {
@@ -43,17 +52,42 @@
             const messageInputDom = document.querySelector('#chat-message-input');
             const message = messageInputDom.value;
             chatSocket.send(JSON.stringify({
+                'type': 'message',
                 'message': message,
                 'username': name,
                 'time' : '{{ time }}',
             }));
             messageInputDom.value = '';
         };
+
+        function playCard(id, hp, atk, card_name){
+            chatSocket.send(JSON.stringify({
+                'type': 'card',
+                'card_id': id,
+                'card_hp': hp,
+                'card_atk': atk,
+                'card_name': card_name,
+                'username': name,
+            }));
+            console.log("sent");
+        };
+
     </script>
     <h3>Selected deck : {{ deck.name }}</h3>
     <ul>
         {% for card in deck.cards.all %}
-        <li> {{ card.name }}  || HP : {{ card.health }} || Atk : {{ card.attack }} </li>
+        <div id="card_div_{{card.id}}" >
+            <li> {{ card.name }}  || HP : {{ card.health }} || Atk : {{ card.attack }}
+                <input id="card_submit_{{card.id}}"
+                       type="button"
+                       value="Send"
+                       onclick="playCard(
+                                    '{{card.id}}',
+                                    '{{card.health}}',
+                                    '{{card.attack}}',
+                                    '{{card.name}}')">
+            </li>
+        </div>
         {% endfor %}
     </ul>
 </body>
